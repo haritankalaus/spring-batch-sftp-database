@@ -1,4 +1,4 @@
-package com.example.batchdemo.domain.model;
+package com.example.batchdemo.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -6,9 +6,11 @@ import lombok.Data;
 
 @Entity
 @Data
-public class LoanRecord {
+public class Customer {
     @Id
     private Long id;
     private String name;
-    private Double amount;
+    private int age;
+    private String email;
+    private String address;
 }

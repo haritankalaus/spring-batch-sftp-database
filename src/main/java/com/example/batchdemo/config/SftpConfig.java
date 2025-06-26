@@ -1,8 +1,10 @@
-package com.example.batchdemo.infrastructure.config;
+package com.example.batchdemo.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.integration.sftp.session.DefaultSftpSessionFactory;
 
 @Configuration
@@ -20,6 +22,7 @@ public class SftpConfig {
     private String sftpPassword;
 
     @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public DefaultSftpSessionFactory sftpSessionFactory() {
         DefaultSftpSessionFactory factory = new DefaultSftpSessionFactory(true);
         factory.setHost(sftpHost);

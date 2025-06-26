@@ -1,9 +1,12 @@
-package com.example.batchdemo.infrastructure.config;
+package com.example.batchdemo.job;
 
-import com.example.batchdemo.domain.model.LoanRecord;
-import com.example.batchdemo.infrastructure.batch.processor.LoanRecordProcessor;
-import com.example.batchdemo.infrastructure.batch.reader.MultiFileCsvReader;
-import com.example.batchdemo.infrastructure.sftp.SftpService;
+import com.example.batchdemo.model.Customer;
+import com.example.batchdemo.processor.CustomerProcessor;
+import com.example.batchdemo.service.SftpService;
+import com.example.batchdemo.reader.MultiFileReader;
+import com.example.batchdemo.reader.FileReaderFactory;
+import com.example.batchdemo.listener.SftpSessionJobListener;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -21,7 +24,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import jakarta.persistence.EntityManagerFactory;
 
 @Configuration
-public class BatchConfig {
+public class SftpToDatabaseJob {
 
     @Autowired
     private SftpService sftpService;
@@ -30,36 +33,43 @@ public class BatchConfig {
     private EntityManagerFactory entityManagerFactory;
 
     @Autowired
-    private LoanRecordProcessor loanRecordProcessor;
+    private CustomerProcessor customerProcessor;
+
+    @Autowired
+    private SftpSessionJobListener sftpSessionJobListener;
 
     @Bean
     public Job sftpCsvToDbJob(JobRepository jobRepository, Step sftpCsvToDbStep) {
         return new JobBuilder("sftpCsvToDbJob", jobRepository)
                 .start(sftpCsvToDbStep)
+                .listener(sftpSessionJobListener)
                 .build();
     }
 
     @Bean
     public Step sftpCsvToDbStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         return new StepBuilder("sftpCsvToDbStep", jobRepository)
-                .<String[], LoanRecord>chunk(10, transactionManager)
-                .reader(csvReader())
-                .processor(loanRecordProcessor)
-                .writer(loanRecordWriter())
+                .<String[], Customer>chunk(10, transactionManager)
+                .reader(fileReader())
+                .processor(customerProcessor)
+                .writer(customerWriter())
                 .build();
     }
 
     @Value("${sftp.input.directory}")
     private String sftpInputDirectory;
 
+    @Autowired
+    private FileReaderFactory fileReaderFactory;
+
     @Bean
-    public ItemReader<String[]> csvReader() {
-        return new MultiFileCsvReader(sftpService, sftpInputDirectory);
+    public ItemReader<String[]> fileReader() {
+        return new MultiFileReader(sftpService, fileReaderFactory, sftpInputDirectory);
     }
 
     @Bean
-    public ItemWriter<LoanRecord> loanRecordWriter() {
-        return new JpaItemWriterBuilder<LoanRecord>()
+    public ItemWriter<Customer> customerWriter() {
+        return new JpaItemWriterBuilder<Customer>()
                 .entityManagerFactory(entityManagerFactory)
                 .build();
     }
