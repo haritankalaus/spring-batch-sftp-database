@@ -23,23 +23,59 @@ class ExcelFileReaderTest {
     @Test
     void read_Success() throws Exception {
         // Arrange
-        InputStream inputStream = createTestExcelFile(new String[]{"John", "30", "john@test.com"});
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet();
+        
+        // Create header row
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("name");
+        headerRow.createCell(1).setCellValue("age");
+        headerRow.createCell(2).setCellValue("email");
+        headerRow.createCell(3).setCellValue("address");
+        
+        // Create data row
+        Row dataRow = sheet.createRow(1);
+        dataRow.createCell(0).setCellValue("John");
+        dataRow.createCell(1).setCellValue("30");
+        dataRow.createCell(2).setCellValue("john@test.com");
+        dataRow.createCell(3).setCellValue("123 Main St");
+        
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        workbook.write(bos);
+        workbook.close();
+        
+        InputStream inputStream = new ByteArrayInputStream(bos.toByteArray());
 
         // Act
         String[] result = excelFileReader.read(inputStream);
 
         // Assert
         assertNotNull(result);
-        assertEquals(3, result.length);
+        assertEquals(4, result.length);
         assertEquals("John", result[0]);
         assertEquals("30", result[1]);
         assertEquals("john@test.com", result[2]);
+        assertEquals("123 Main St", result[3]);
     }
 
     @Test
     void read_EmptyFile() throws Exception {
         // Arrange
-        InputStream inputStream = createTestExcelFile(new String[0]);
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet();
+        
+        // Create header row only
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("name");
+        headerRow.createCell(1).setCellValue("age");
+        headerRow.createCell(2).setCellValue("email");
+        headerRow.createCell(3).setCellValue("address");
+        
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        workbook.write(bos);
+        workbook.close();
+        
+        InputStream inputStream = new ByteArrayInputStream(bos.toByteArray());
 
         // Act
         String[] result = excelFileReader.read(inputStream);
@@ -58,20 +94,26 @@ class ExcelFileReaderTest {
         assertThrows(RuntimeException.class, () -> excelFileReader.read(inputStream));
     }
 
-    private InputStream createTestExcelFile(String[] data) throws Exception {
+    @Test
+    void read_InvalidHeader() throws Exception {
+        // Arrange
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Test");
-        Row row = sheet.createRow(0);
-
-        for (int i = 0; i < data.length; i++) {
-            Cell cell = row.createCell(i);
-            cell.setCellValue(data[i]);
-        }
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        workbook.write(outputStream);
+        Sheet sheet = workbook.createSheet();
+        
+        // Create header row with wrong number of columns
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("name");
+        headerRow.createCell(1).setCellValue("age");
+        headerRow.createCell(2).setCellValue("email");
+        
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        workbook.write(bos);
         workbook.close();
+        
+        InputStream inputStream = new ByteArrayInputStream(bos.toByteArray());
 
-        return new ByteArrayInputStream(outputStream.toByteArray());
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> excelFileReader.read(inputStream),
+                "Should throw exception for invalid header");
     }
 }

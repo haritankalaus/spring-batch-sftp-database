@@ -19,6 +19,8 @@
 
     <properties>
         <java.version>17</java.version>
+        <spring-boot.version>3.4.4</spring-boot.version>
+        <poi.version>5.2.3</poi.version>
     </properties>
 
     <dependencies>

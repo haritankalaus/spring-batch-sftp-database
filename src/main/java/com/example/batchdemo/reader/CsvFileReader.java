@@ -19,8 +19,8 @@ public class CsvFileReader implements FileReader {
                 return new String[0];
             }
             
-            if (header.length != 3) { // We expect name,age,email
-                throw new RuntimeException("Invalid CSV format: Header must have exactly 3 columns");
+            if (header.length != 4) { // We expect name,age,email,address
+                throw new RuntimeException("Invalid CSV format: Header must have exactly 4 columns");
             }
             
             // Read data row

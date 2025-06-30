@@ -20,13 +20,22 @@ public class ExcelFileReader implements FileReader {
             Workbook workbook = WorkbookFactory.create(inputStream);
             try {
                 Sheet sheet = workbook.getSheetAt(0);
-                Row row = sheet.getRow(0);
-                if (row == null) {
+                // Skip header row and read first data row
+                Row headerRow = sheet.getRow(0);
+                Row dataRow = sheet.getRow(1);
+                
+                // Validate header
+                if (headerRow == null || headerRow.getPhysicalNumberOfCells() != 4) {
+                    throw new RuntimeException("Invalid Excel format: Header must have exactly 4 columns");
+                }
+                
+                // Return empty if no data rows
+                if (dataRow == null) {
                     return new String[0];
                 }
 
                 List<String> rowData = new ArrayList<>();
-                for (Cell cell : row) {
+                for (Cell cell : dataRow) {
                     if (cell != null) {
                         CellType cellType = cell.getCellType();
                         if (cellType == CellType.STRING) {

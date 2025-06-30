@@ -1,0 +1,9 @@
+services:
+  sftp:
+    image: atmoz/sftp:latest
+    ports:
+      - "2222:22"
+    volumes:
+      - ./sample-data:/home/testuser/upload
+    command: testuser:testpass:1001:1001
+    restart: unless-stopped

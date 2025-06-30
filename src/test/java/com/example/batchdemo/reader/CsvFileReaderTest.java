@@ -20,7 +20,7 @@ class CsvFileReaderTest {
     @Test
     void read_Success() {
         // Arrange
-        String csvContent = "name,age,email\nJohn,30,john@test.com";
+        String csvContent = "name,age,email,address\nJohn,30,john@test.com,123 Main St";
         InputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
         // Act
@@ -28,10 +28,11 @@ class CsvFileReaderTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(3, result.length);
+        assertEquals(4, result.length);
         assertEquals("John", result[0]);
         assertEquals("30", result[1]);
         assertEquals("john@test.com", result[2]);
+        assertEquals("123 Main St", result[3]);
     }
 
     @Test

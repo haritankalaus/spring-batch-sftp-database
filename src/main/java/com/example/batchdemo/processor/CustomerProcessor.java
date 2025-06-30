@@ -17,7 +17,7 @@ public class CustomerProcessor implements ItemProcessor<String[], Customer> {
         Customer record = new Customer();
         record.setId(System.currentTimeMillis());
         record.setName(items[0]);
-        record.setAge(Integer.parseInt(items[1])); // This will throw NumberFormatException for invalid age
+        record.setAge((int)Float.parseFloat(items[1])); // Handle both decimal and integer age values
         record.setEmail(items[2]);
         record.setAddress(items[3]);
         return record;

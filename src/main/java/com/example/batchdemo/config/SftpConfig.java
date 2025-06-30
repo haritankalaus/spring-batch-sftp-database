@@ -21,6 +21,12 @@ public class SftpConfig {
     @Value("${sftp.password}")
     private String sftpPassword;
 
+    @Value("${sftp.input.directory}")
+    private String sftpInputDirectory;
+
+    @Value("${sftp.output.directory}")
+    private String sftpOutputDirectory;
+
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public DefaultSftpSessionFactory sftpSessionFactory() {
